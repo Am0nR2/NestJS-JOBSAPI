@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Position{
+  ADMIN
+  FOUNDER
+  WORKER
+  NOT_WORKING
+  HR_MANAGER 
+}
+
+enum Jobs{
+  CEO
+  ENGINEER
+  TEACHER
+  HR_MANAGER
+  SOFTWARE_DEVELOPER
+  BACKEND_DEVELOPER
+  FRONTEND_DEVELOPER
+  FULLSTACK_DEVELOPER
+  PSYCHOLOGIST
+  GRAPHICS_DESIGNER
+  UNEMPLOYED
+  FORMER_CEO
+}
+
+model User {
+  id                                    String @id @default(uuid())
+  name                                  String 
+  email                                 String @unique
+  password                              String
+  working                               Boolean @default(false)
+  position                              Position @default(NOT_WORKING)
+  jobTitle                              Jobs @default(UNEMPLOYED)
+  skills                                String[] @default(["No Skills Were added"])
+  created_at                            DateTime @default(now())
+  updated_at                            DateTime @updatedAt
+  company_id                            String? 
+  company                               Company? @relation("User Works",fields: [company_id], references: [id])
+  owns                                  Company[] @relation("User Owns")
+}
+
+model Company{
+  id                                    String @id @default(uuid())
+  name                                  String
+  email                                 String? @unique
+  founder_id                            String 
+  founder                               User @relation("User Owns",fields: [founder_id], references: [id])                                
+  workers                               User[] @relation("User Works")
+  created_at                            DateTime @default(now())
+  updated_at                            DateTime @updatedAt
+  jobs_posted                           Job[] 
+}
+
+model Job{
+  id                                    Int @id @default(autoincrement())
+  jobTitle                              Jobs
+  description                           String 
+  company_id                            String 
+  company                               Company @relation(fields: [company_id], references: [id])
+  created_at                            DateTime @default(now())
+  updated_at                            DateTime @updatedAt
+}
+
